@@ -1,0 +1,276 @@
+<html>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #100f0f;
+            animation: fadeIn 1s ease-in-out;
+            overflow: hidden; /* Hide scrollbars */
+        }
+
+        /* Matrix animation styling */
+        .matrix {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            font-size: 20px;
+            pointer-events: none; /* Ignore clicks */
+        }
+
+        .matrix div {
+            display: inline-block;
+            white-space: nowrap;
+            overflow: hidden;
+            position: absolute;
+            color: #00ff00; /* Matrix green color */
+            animation: scrollDown linear infinite;
+        }
+
+        @keyframes scrollDown {
+            0% {
+                transform: translateY(-100vh); /* Start above the viewport */
+            }
+            100% {
+                transform: translateY(100vh); /* Move below the viewport */
+            }
+        }
+
+        /* Calculator styling */
+        .calculator {
+            background-color: #f4f4f4;
+            color: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            width: 320px;
+            position: relative;
+            z-index: 1;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        #display {
+            width: 100%;
+            height: 60px;
+            font-size: 2rem;
+            text-align: right;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            background-color: #080707;
+            color: #fff;
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        .calculator-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            padding: 15px;
+            font-size: 1.2rem;
+            background-color: #121010;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.1s ease, box-shadow 0.3s ease;
+            animation: buttonAppear 0.3s ease-out;
+            color: #fff;
+            box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.75);
+            position: relative;
+            z-index: 1;
+        }
+
+        button:hover {
+            animation: rainbowGlow 1.5s infinite;
+        }
+
+        button:active {
+            transform: scale(0.95);
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .zero {
+            grid-column: span 2;
+        }
+
+        @keyframes rainbowGlow {
+            0% {
+                box-shadow: 0 0 15px red;
+            }
+            20% {
+                box-shadow: 0 0 15px rgb(116, 42, 165);
+            }
+            40% {
+                box-shadow: 0 0 15px yellow;
+            }
+            60% {
+                box-shadow: 0 0 15px green;
+            }
+            80% {
+                box-shadow: 0 0 15px blue;
+            }
+            100% {
+                box-shadow: 0 0 15px purple;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes buttonAppear {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="matrix" class="matrix"></div>
+
+    <div class="calculator">
+        <input id="display" type="text" readonly>
+        <div class="calculator-buttons">
+            <!-- First row -->
+            <button onclick="clearDisplay()">C</button>
+            <button onclick="backspace()">Delete</button>
+            <button onclick="appendValue('/')">/</button>
+            <button onclick="appendValue('*')">*</button>
+            <!-- Second row -->
+            <button onclick="appendValue('7')">7</button>
+            <button onclick="appendValue('8')">8</button>
+            <button onclick="appendValue('9')">9</button>
+            <button onclick="appendValue('-')">-</button>
+            <!-- Third row -->
+            <button onclick="appendValue('4')">4</button>
+            <button onclick="appendValue('5')">5</button>
+            <button onclick="appendValue('6')">6</button>
+            <button onclick="appendValue('+')">+</button>
+            <!-- Fourth row -->
+            <button onclick="appendValue('1')">1</button>
+            <button onclick="appendValue('2')">2</button>
+            <button onclick="appendValue('3')">3</button>
+            <button onclick="calculate()">=</button>
+            <!-- Fifth row -->
+            <button onclick="appendValue('0')" class="zero">0</button>
+            <button onclick="appendValue('.')">.</button>
+            <button onclick="appendValue('sqrt(')">√</button>
+            <button onclick="appendValue('log10(')">log</button>
+            <!-- Sixth row -->
+            <button onclick="appendValue('pi')">π</button>
+            <button onclick="appendValue('e')">e</button>
+            <button onclick="appendValue('^')">^</button>
+            <button onclick="appendValue('(')">(</button>
+            <!-- Seventh row -->
+            <button onclick="appendValue(')')">)</button>
+            <button onclick="appendValue('sin(')">sin</button>
+            <button onclick="appendValue('cos(')">cos</button>
+            <button onclick="appendValue('tan(')">tan</button>
+        </div>
+    </div>
+
+    <script>
+      const matrix = document.getElementById('matrix');
+const numColumns = Math.floor(window.innerWidth / 20); // Number of columns based on viewport width
+const numRows = Math.floor(window.innerHeight / 20); // Number of rows based on viewport height
+const characters = 'Calculator';
+
+function generateMatrix() {
+    let matrixHTML = '';
+    for (let i = 0; i < numColumns; i++) {
+        for (let j = 0; j < numRows; j++) {
+            const randomChar = characters.charAt(Math.floor(Math.random() * characters.length));
+            matrixHTML += `<div style="left: ${i * 20}px; top: ${j * 20}px; animation: scrollDown ${Math.random() * 10 + 10}s linear infinite;">${randomChar}</div>`;
+        }
+    }
+    matrix.innerHTML = matrixHTML;
+}
+
+window.addEventListener('resize', () => {
+    matrix.innerHTML = ''; // Clear existing content
+    generateMatrix(); // Re-generate matrix for new viewport size
+});
+
+generateMatrix(); // Initial matrix generation
+
+
+        // Calculator functionality
+        function appendValue(value) {
+            let display = document.getElementById("display");
+            display.value += value;
+        }
+
+        function clearDisplay() {
+            document.getElementById("display").value = '';
+        }
+
+        function backspace() {
+            let display = document.getElementById("display");
+            display.value = display.value.slice(0, -1);
+        }
+
+        function calculate() {
+            let display = document.getElementById("display");
+            let expression = display.value;
+
+            // Replace math functions and constants with JavaScript equivalents
+            expression = expression.replace(/sqrt\(/g, 'Math.sqrt(');
+            expression = expression.replace(/log10\(/g, 'Math.log10(');
+            expression = expression.replace(/pi/g, 'Math.PI');
+            expression = expression.replace(/e/g, 'Math.E');
+            expression = expression.replace(/\^/g, '**'); // Power operator
+
+            // Handle trigonometric functions assuming radians
+            expression = expression.replace(/sin\(/g, 'Math.sin(');
+            expression = expression.replace(/cos\(/g, 'Math.cos(');
+            expression = expression.replace(/tan\(/g, 'Math.tan(');
+
+            try {
+                let result = eval(expression);
+                display.value = result;
+            } catch (error) {
+                display.value = "Error";
+            }
+        }
+    </script>
+
+</body>
+</html>
